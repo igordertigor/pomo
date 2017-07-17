@@ -7,12 +7,9 @@ Usage:
 Options:
     -l FILE --log-file=FILE  name of log file to write duration to
 """
-import sys
-import asyncio
 from docopt import docopt
-from datetime import datetime
 
-from pomo import sound
+from pomo import utils, core
 
 TIMES = {
     'test': 6,
@@ -30,67 +27,6 @@ def done():
 ACTIONS = {'d': ('Done', done)}
 
 
-async def count_down(duration):
-    global running
-    while running:
-        await asyncio.sleep(1)
-        duration -= 1
-        msg = 'Remaining' if duration > 0 else 'OVER TIME'
-        print('\r{}: {}'.format(
-            msg,
-            format_time_interval(duration)),
-            end='',
-            flush=True)
-
-
-def format_time_interval(seconds):
-    return '{}:{}'.format(abs(seconds) // 60, str(abs(seconds) % 60).zfill(2))
-
-
-class Prompt:
-    def __init__(self, loop=None):
-        self.loop = loop or asyncio.get_event_loop()
-        self.q = asyncio.Queue(loop=self.loop)
-        self.loop.add_reader(sys.stdin, self.got_input)
-
-    def got_input(self):
-        asyncio.ensure_future(self.q.put(sys.stdin.readline()), loop=self.loop)
-
-    async def __call__(self, msg, end='\n', flush=False):
-        print(msg, end=end, flush=flush)
-        return (await self.q.get()).rstrip('\n')
-
-
-async def manage_input(loop):
-    global running
-    description = '\n' + '\n'.join(['{} -> {}'.format(key, value[0])
-                                    for key, value in ACTIONS.items()]) + '\n'
-    prompt = Prompt(loop)
-    while running:
-        key = await prompt(description)
-        if key in ACTIONS:
-            running = ACTIONS[key][1]()
-
-
-def start_interval(duration):
-    global running
-    running = True
-    t0 = datetime.now()
-
-    player = sound.SoundPlayer('beep-07.mp3')
-
-    loop = asyncio.get_event_loop()
-    loop.call_later(duration, player.play)
-    loop.call_later(duration, player.schedule, duration, loop)
-    futures = [count_down(duration), manage_input(loop)]
-
-    loop.run_until_complete(asyncio.wait(futures))
-
-    t1 = datetime.now()
-
-    return t1 - t0
-
-
 if __name__ == '__main__':
     docopt = docopt(__doc__)
 
@@ -98,10 +34,8 @@ if __name__ == '__main__':
     duration = TIMES[docopt['DURATION']]
 
     print('{}: {}'.format(docopt['DURATION'], description))
-    dt = start_interval(duration)
+    dt = core.start_interval(duration, ACTIONS)
     print('\rInterval:', dt)
 
     if docopt['--log-file'] is not None:
-        with open(docopt['--log-file'], 'a') as f:
-            formatted_time = format_time_interval(int(dt.total_seconds()))
-            f.write('{},{}'.format(formatted_time, description))
+        utils.write_info(docopt['--log-file'], dt, description)
