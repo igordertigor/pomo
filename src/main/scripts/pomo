@@ -2,7 +2,7 @@
 """Run Pomodoro
 
 Usage:
-    pomodoro.py [-l FILE] DURATION [DESCRIPTION ...]
+    pomo [-l FILE] DURATION [DESCRIPTION ...]
 
 Options:
     -l FILE --log-file=FILE  name of log file to write duration to
