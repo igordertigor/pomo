@@ -5,4 +5,4 @@ def format_time_interval(seconds):
 def write_info(filename, dt, description):
     with open(filename, 'a') as f:
         formatted_time = format_time_interval(int(dt.total_seconds()))
-        f.write('{},{}'.format(formatted_time, description))
+        f.write('{},{}\n'.format(formatted_time, description))
