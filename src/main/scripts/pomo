@@ -10,6 +10,7 @@ Options:
 from docopt import docopt
 
 from pomo import utils, core
+from pomo import version
 
 TIMES = {
     'test': 6,
@@ -28,7 +29,7 @@ ACTIONS = {'d': ('Done', done)}
 
 
 if __name__ == '__main__':
-    docopt = docopt(__doc__)
+    docopt = docopt(__doc__, version=version)
 
     description = ' '.join(docopt['DESCRIPTION'])
     duration = TIMES[docopt['DURATION']]

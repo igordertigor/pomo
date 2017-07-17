@@ -10,10 +10,12 @@ use_plugin("python.distutils")
 
 name = "pomo"
 default_task = "publish"
-version = '0.1'
+version = '0.2'
 
 
 @init
 def set_properties(project):
     project.depends_on('pygame')
     project.depends_on('docopt')
+    with open('src/main/python/pomo/__init__.py', 'w') as f:
+        f.write('version = {}'.format(version))
