@@ -17,5 +17,6 @@ version = '0.2'
 def set_properties(project):
     project.depends_on('pygame')
     project.depends_on('docopt')
+    project.depends_on('pyyaml')
     with open('src/main/python/pomo/__init__.py', 'w') as f:
         f.write('version = {}'.format(version))
