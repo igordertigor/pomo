@@ -18,12 +18,12 @@ async def count_down(duration):
             flush=True)
 
 
-def start_interval(duration, actions):
+def start_interval(duration, actions, soundfile):
     global running
     running = True
     t0 = datetime.now()
 
-    player = sound.SoundPlayer('beep-07.mp3')
+    player = sound.SoundPlayer(soundfile)
 
     loop = asyncio.get_event_loop()
     loop.call_later(duration, player.play)

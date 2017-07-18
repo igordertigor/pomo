@@ -2,10 +2,13 @@
 """Run Pomodoro
 
 Usage:
-    pomo [-l FILE] DURATION [DESCRIPTION ...]
+    pomo [-l FILE][-s SOUND] DURATION [DESCRIPTION ...]
 
 Options:
-    -l FILE --log-file=FILE  name of log file to write duration to
+    -l FILE --log-file=FILE      name of log file to write duration to
+                                 [default: None]
+    -s SOUND --sound-file=SOUND  name of sound file to play when a pomodoro is
+                                 over [default: beep.mp3]
 """
 from docopt import docopt
 
@@ -30,12 +33,13 @@ ACTIONS = {'d': ('Done', done)}
 
 if __name__ == '__main__':
     docopt = docopt(__doc__, version=version)
+    print(docopt)
 
     description = ' '.join(docopt['DESCRIPTION'])
     duration = TIMES[docopt['DURATION']]
 
     print('{}: {}'.format(docopt['DURATION'], description))
-    dt = core.start_interval(duration, ACTIONS)
+    dt = core.start_interval(duration, ACTIONS, docopt['--sound-file'])
     print('\rInterval:', dt)
 
     if docopt['--log-file'] is not None:
