@@ -70,4 +70,4 @@ if __name__ == '__main__':
 
     log_file = os.path.expanduser(cfg['log_file'])
     if log_file is not None:
-        utils.write_info(log_file, dt, description)
+        utils.write_info(log_file, dt, docopt['DURATION'], description)
