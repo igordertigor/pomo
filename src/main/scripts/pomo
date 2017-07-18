@@ -2,15 +2,18 @@
 """Run Pomodoro
 
 Usage:
-    pomo [-l FILE][-s SOUND] DURATION [DESCRIPTION ...]
+    pomo [options] DURATION [DESCRIPTION ...]
 
 Options:
+    -c CONFIG --config=CONFIG    name of config file [default: ~/.pomorc]
     -l FILE --log-file=FILE      name of log file to write duration to
                                  [default: None]
     -s SOUND --sound-file=SOUND  name of sound file to play when a pomodoro is
                                  over [default: beep.mp3]
 """
+import os
 from docopt import docopt
+import yaml
 
 from pomo import utils, core
 from pomo import version
@@ -24,6 +27,28 @@ TIMES = {
 }
 
 
+def parse_config(args):
+    config_file = os.path.expanduser(args['--config'])
+    if os.path.exists(config_file):
+        with open(config_file) as f:
+            cfg = yaml.load(f.read())
+    else:
+        cfg = {}
+    cfg.setdefault('times', TIMES)
+    if 'log_file' not in cfg and args['--log-file'] is not None:
+        cfg['log_file'] = args['--log-file']
+    if 'sound_file' not in cfg:
+        cfg['sound_file'] = args['--sound-file']
+    elif not args['--sound-file'] == 'beep.mp3':
+        cfg['sound_file'] = args['--sound-file']
+
+    if not os.path.exists(config_file) and args['--config'] == '~/.pomorc':
+        with open(config_file, 'w') as f:
+            f.write(yaml.dump(cfg))
+
+    return cfg
+
+
 def done():
     return False
 
@@ -33,14 +58,15 @@ ACTIONS = {'d': ('Done', done)}
 
 if __name__ == '__main__':
     docopt = docopt(__doc__, version=version)
-    print(docopt)
+    cfg = parse_config(docopt)
 
     description = ' '.join(docopt['DESCRIPTION'])
-    duration = TIMES[docopt['DURATION']]
+    duration = cfg['times'][docopt['DURATION']]
 
     print('{}: {}'.format(docopt['DURATION'], description))
-    dt = core.start_interval(duration, ACTIONS, docopt['--sound-file'])
+    dt = core.start_interval(duration, ACTIONS, cfg['sound_file'])
     print('\rInterval:', dt)
 
-    if docopt['--log-file'] is not None:
-        utils.write_info(docopt['--log-file'], dt, description)
+    log_file = os.path.expanduser(cfg['log_file'])
+    if log_file is not None:
+        utils.write_info(log_file, dt, description)
