@@ -64,7 +64,8 @@ if __name__ == '__main__':
     duration = cfg['times'][docopt['DURATION']]
 
     print('{}: {}'.format(docopt['DURATION'], description))
-    dt = core.start_interval(duration, ACTIONS, cfg['sound_file'])
+    dt = core.start_interval(duration, ACTIONS,
+                             os.path.expanduser(cfg['sound_file']))
     print('\rInterval:', dt)
 
     log_file = os.path.expanduser(cfg['log_file'])
