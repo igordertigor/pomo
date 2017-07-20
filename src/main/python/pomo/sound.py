@@ -1,13 +1,13 @@
 import pygame
 from pygame.mixer import music
-import os
+import subprocess
 
 
 class SoundPlayer(object):
 
     def __init__(self, sound):
-        if not os.system('which mpg321'):
-            self.cmd = 'mpg321 {}'.format(sound)
+        if not subprocess.run(['which', 'mpg321']):
+            self.cmd = ['mpg321', sound]
         else:
             self.cmd = None
             pygame.init()
@@ -15,7 +15,7 @@ class SoundPlayer(object):
 
     def play(self):
         if self.cmd is not None:
-            os.system(self.cmd)
+            subprocess.run(self.cmd)
         else:
             music.load(self.sound)
             music.play()

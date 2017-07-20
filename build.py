@@ -10,7 +10,7 @@ use_plugin("python.distutils")
 
 name = "pomo"
 default_task = "publish"
-version = '0.6'
+version = '0.7'
 
 
 @init
