@@ -10,6 +10,7 @@ Options:
                                  [default: None]
     -s SOUND --sound-file=SOUND  name of sound file to play when a pomodoro is
                                  over [default: beep.mp3]
+    -z SECONDS --snooze=SECONDS  duration of snoozing [default: 180]
 """
 import os
 from docopt import docopt
@@ -34,7 +35,12 @@ def parse_config(args):
             cfg = yaml.load(f.read())
     else:
         cfg = {}
+
     cfg.setdefault('times', TIMES)
+    cfg['times'].setdefault('snooze', int(args['--snooze']))
+    if not int(args['--snooze']) == 180:
+        cfg['times']['snooze'] = int(args['--snooze'])
+
     if 'log_file' not in cfg and args['--log-file'] is not None:
         cfg['log_file'] = args['--log-file']
     if 'sound_file' not in cfg:
@@ -64,8 +70,10 @@ if __name__ == '__main__':
     duration = cfg['times'][docopt['DURATION']]
 
     print('{}: {}'.format(docopt['DURATION'], description))
-    dt = core.start_interval(duration, ACTIONS,
-                             os.path.expanduser(cfg['sound_file']))
+    dt = core.start_interval(duration,
+                             ACTIONS,
+                             os.path.expanduser(cfg['sound_file']),
+                             snooze_duration=cfg['times']['snooze'])
     print('\rInterval:', dt)
 
     log_file = os.path.expanduser(cfg['log_file'])

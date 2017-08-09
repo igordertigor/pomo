@@ -18,7 +18,7 @@ async def count_down(duration):
             flush=True)
 
 
-def start_interval(duration, actions, soundfile):
+def start_interval(duration, actions, soundfile, snooze_duration=180):
     global running
     running = True
     t0 = datetime.now()
@@ -27,7 +27,8 @@ def start_interval(duration, actions, soundfile):
 
     loop = asyncio.get_event_loop()
     loop.call_later(duration, player.play)
-    loop.call_later(duration, player.schedule, duration, loop)
+    for i in range(200):
+        loop.call_later(duration+i*snooze_duration, player.schedule, snooze_duration, loop)
     futures = [count_down(duration), manage_input(loop, actions)]
 
     loop.run_until_complete(asyncio.wait(futures))
